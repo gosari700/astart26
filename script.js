@@ -3725,15 +3725,15 @@ function update(delta) {
             const sentenceToFirework = sentences[sentenceIndex];
             const globalIndexOfSentence = sentenceIndex;
             
-            // 홀수 번호 문장(인덱스 기준 0,2,4...)에서만 미디어 표시
+            // 모든 문장(홀수/짝수) 폭발 시 미디어 표시
             if (typeof showSentenceImage === 'function') {
-                // 홀수 번호 문장(실제 번호는 1,3,5... 인덱스는 0,2,4...)에서만 미디어 처리
                 if (globalIndexOfSentence % 2 === 0) {
                     console.log(`홀수 문장 폭발: ${globalIndexOfSentence+1}번 문장, 상단 미디어 표시`);
-                    showSentenceImage(globalIndexOfSentence);
                 } else {
-                    console.log(`짝수 문장 폭발: ${globalIndexOfSentence+1}번 문장, 상단 미디어 표시 안함`);
+                    console.log(`짝수 문장 폭발: ${globalIndexOfSentence+1}번 문장, 상단 미디어 표시`);
                 }
+                // 모든 문장 폭발 시 미디어 처리 함수 호출
+                showSentenceImage(globalIndexOfSentence);
             }
             
             startFireworks(sentenceToFirework, globalIndexOfSentence, e.x + e.w / 2, e.y + e.h / 2);
@@ -3995,6 +3995,14 @@ function startGame() {
   
   let storedIndex = Number(localStorage.getItem('sentenceIndex') || 0);
   sentenceIndex = storedIndex % sentences.length;
+  
+  // 홀수 인덱스인 경우 이전 짝수 인덱스로 조정 (항상 짝수로 시작하기 위함)
+  if (sentenceIndex % 2 === 1) { // 홀수 번호 차례라면
+    sentenceIndex = sentenceIndex - 1; // 직전 짝수 번호로 설정
+    if (sentenceIndex < 0) sentenceIndex = sentences.length - 2; // 음수가 되면 마지막 짝수 인덱스로 설정
+    console.log(`홀수 인덱스를 이전 짝수 인덱스(${sentenceIndex})로 조정함`);
+  }
+  
   localStorage.setItem('sentenceIndex', sentenceIndex.toString());
   spawnEnemy(); spawnEnemy();
   player.x = canvas.width / 2 - PLAYER_SIZE / 2;

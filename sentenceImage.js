@@ -26,54 +26,66 @@ function showSentenceImage(sentenceIndex) {
     window.hideSentenceImageTimer = null;
   }
 
-  // 홀수 번호 문장(1, 3, 5...)인 경우에만 미디어 변경 처리
-  if (sentenceIndex % 2 === 0) { // 0부터 시작하는 인덱스에서는 짝수(0,2,4...)가 실제로는 홀수(1,3,5...)
-    console.log(`홀수 문장 폭발 - 미디어 변경 시작: ${realSentenceNumber}번 미디어`);
+  // 홀수/짝수 문장 처리
+  let mediaNumber;
+  
+  if (sentenceIndex % 2 === 0) { // 홀수 문장 (0부터 시작하는 인덱스에서는 짝수가 실제로는 홀수)
+    mediaNumber = realSentenceNumber;
+    console.log(`홀수 문장 폭발 - 미디어 변경: ${mediaNumber}번 미디어`);
+  } else {
+    // 짝수 문장인 경우 이전 홀수 문장의 미디어를 표시
+    mediaNumber = realSentenceNumber - 1;
+    console.log(`짝수 문장 폭발 - 해당 미디어 ${mediaNumber}번 표시`);
+  }
+  
+  // 미디어 처리 중 플래그 설정
+  window.isMediaProcessing = true;
+  
+  if (!window.firstExplosionHappened) {
+    // 첫번째 폭발의 경우 바로 미디어 표시
+    window.firstExplosionHappened = true;
+    console.log(`첫번째 폭발: ${mediaNumber}번 미디어 직접 표시`);
     
-    // 미디어 처리 중 플래그 설정
-    window.isMediaProcessing = true;
+    showNewSentenceMedia(mediaNumber);
+    window.currentMediaNumber = mediaNumber;
     
-    if (!window.firstExplosionHappened) {
-      // 첫번째 폭발(1번 문장)의 경우 바로 미디어 표시
-      window.firstExplosionHappened = true;
-      console.log(`첫번째 폭발(${realSentenceNumber}번): 미디어 직접 표시`);
+    // 미디어 처리 완료
+    setTimeout(() => {
+      window.isMediaProcessing = false;
+      console.log(`${mediaNumber}번 미디어 표시 완료 (최초 표시)`);
+    }, MEDIA_TRANSITION_IN_TIME + 100);
+  } else {
+    // 이후 문장에서는 이전 미디어 페이드아웃 후 새 미디어 표시
+    
+    // 이전 미디어와 같은 번호면 그대로 유지
+    if (window.currentMediaNumber === mediaNumber) {
+      console.log(`동일한 미디어(${mediaNumber}번) 유지`);
+      window.isMediaProcessing = false;
+      return;
+    }
+    
+    console.log(`문장 폭발(${realSentenceNumber}번): 이전 미디어 페이드아웃 후 새 미디어(${mediaNumber}번) 표시`);
+    
+    // 이전 미디어 페이드아웃 (3초 동안)
+    fadeOutCurrentMedia(() => {
+      console.log(`이전 미디어(${window.currentMediaNumber}번) 페이드아웃 완료`);
       
-      showNewSentenceMedia(realSentenceNumber);
-      window.currentMediaNumber = realSentenceNumber;
+      // 페이드아웃 완료 후 콘텐츠 초기화
+      resetMediaElements();
       
-      // 미디어 처리 완료
+      // 새 미디어 표시 (페이드인 3초)
+      console.log(`새 미디어(${mediaNumber}번) 페이드인 시작`);
+      showNewSentenceMedia(mediaNumber);
+      
+      // 미디어 번호 업데이트
+      window.currentMediaNumber = mediaNumber;
+      
+      // 미디어 처리 완료 - 페이드인 완료 후
       setTimeout(() => {
         window.isMediaProcessing = false;
-        console.log(`${realSentenceNumber}번 미디어 표시 완료 (최초 표시)`);
+        console.log(`${mediaNumber}번 미디어 표시 완료`);
       }, MEDIA_TRANSITION_IN_TIME + 100);
-    } else {
-      // 이후 홀수 문장(3번, 5번 등)에서는 이전 미디어 페이드아웃 후 새 미디어 표시
-      console.log(`홀수 문장 폭발(${realSentenceNumber}번): 이전 미디어 페이드아웃 후 새 미디어 표시`);
-      
-      // 이전 미디어 페이드아웃 (3초 동안)
-      fadeOutCurrentMedia(() => {
-        console.log(`이전 미디어(${window.currentMediaNumber}번) 페이드아웃 완료`);
-        
-        // 페이드아웃 완료 후 콘텐츠 초기화
-        resetMediaElements();
-        
-        // 새 미디어 표시 (페이드인 3초)
-        console.log(`새 미디어(${realSentenceNumber}번) 페이드인 시작`);
-        showNewSentenceMedia(realSentenceNumber);
-        
-        // 미디어 번호 업데이트
-        window.currentMediaNumber = realSentenceNumber;
-        
-        // 미디어 처리 완료 - 페이드인 완료 후
-        setTimeout(() => {
-          window.isMediaProcessing = false;
-          console.log(`${realSentenceNumber}번 미디어 표시 완료`);
-        }, MEDIA_TRANSITION_IN_TIME + 100);
-      });
-    }
-  } else {
-    // 짝수 문장(2, 4, 6...)인 경우 미디어 유지 (아무 동작 없음)
-    console.log(`짝수 문장 폭발 - 미디어 유지: ${realSentenceNumber}번 문장`);
+    });
   }
 }
 

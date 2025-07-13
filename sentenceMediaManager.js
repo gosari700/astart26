@@ -64,19 +64,25 @@ const SentenceMediaManager = {
     if (isOddSentence) {
       // 홀수 문장인 경우
       console.log(`홀수 문장 폭발(${realSentenceNumber}번) - 미디어 변경 처리`);
-      this.handleOddSentenceExplosion(realSentenceNumber);
+      // 홀수 문장에 대응하는 짝수 문장도 함께 표시 (홀수+1 = 짝수)
+      const correspondingEvenSentence = realSentenceNumber + 1;
+      if (correspondingEvenSentence <= 96) {  // 96번이 마지막 문장인 경우 체크
+        console.log(`홀수 문장 폭발에 대응하는 짝수 문장(${correspondingEvenSentence}번)도 함께 표시`);
+      }
+      this.handleSentenceMediaChange(realSentenceNumber);
     } else {
-      // 짝수 문장인 경우
-      console.log(`짝수 문장 폭발(${realSentenceNumber}번) - 미디어 유지`);
-      // 짝수 문장 폭발 시에는 미디어를 변경하지 않음 (유지)
+      // 짝수 문장인 경우 - 짝수 문장에 해당하는 미디어도 표시
+      const correspondingOddSentence = realSentenceNumber - 1;
+      console.log(`짝수 문장 폭발(${realSentenceNumber}번) - 해당 미디어 ${correspondingOddSentence}번 표시`);
+      this.handleSentenceMediaChange(correspondingOddSentence);
     }
   },
   
   /**
-   * 홀수 문장 폭발 처리
+   * 문장 폭발 시 미디어 변경 처리 
    * @param {number} sentenceNumber - 실제 문장 번호 (1부터 시작)
    */
-  handleOddSentenceExplosion: function(sentenceNumber) {
+  handleSentenceMediaChange: function(sentenceNumber) {
     // 모든 타이머 취소 (중요: 미디어가 나오자마자 사라지는 문제 방지)
     if (this.hideSentenceImageTimer) {
       console.log(`이전 타이머 취소 (hideSentenceImageTimer)`);
@@ -89,7 +95,7 @@ const SentenceMediaManager = {
       console.log(`미디어 처리 중... 잠시 후 다시 시도`);
       setTimeout(() => {
         console.log(`재시도: ${sentenceNumber}번 문장 미디어 표시`);
-        this.handleOddSentenceExplosion(sentenceNumber);
+        this.handleSentenceMediaChange(sentenceNumber);
       }, 500);
       return;
     }
